@@ -2,6 +2,9 @@ import java.io.BufferedReader;
 import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.io.IOException;
+import java.util.logging.Level;
+import java.util.logging.Logger;
+
 //
 import java.util.StringTokenizer;
 /**
@@ -19,6 +22,7 @@ public class Request extends Message {
     private String uri;
     private String HTTP_version;
     private byte[] body;
+    private static final Logger log = Logger.getLogger("RequestLogging");
     
     public Request() { super(); }
     
@@ -71,26 +75,24 @@ public class Request extends Message {
     public static Request parse(final InputStream input) throws IOException {
        try{
             BufferedReader in = new BufferedReader(new InputStreamReader(input));
+            String line = in.readLine();
             while(in.readLine()!=null){
-                try{
-                    String line = in.readLine();
-                    if(line.startsWith("GET")){
-                        System.out.println("Get method in execution");
-                        String[] params = line.split(" ");
-                        String uri = params[1];
-                        String v = params[2];
-                        return(new Request(HTTPMethodType.GET, uri, v));
-                    }
-                    else{
-                        System.out.println(line);
-                    }
-                } catch (IOException e){
-                    System.out.println("Readline failed");
-                    System.exit(-1);
+                if(line.startsWith("GET")){
+                    log.log(Level.INFO, "GET request received");
+                    String[] params = line.split(" ");
+                    String uri = params[1];
+                    log.log(Level.INFO, ("GET URI is " +uri));
+                    String v = params[2];
+                    log.log(Level.INFO, ("GET version is " +v));
+                    return(new Request(HTTPMethodType.GET, uri, v));
                 }
+                else{
+                    log.log(Level.WARNING, line);
+                }
+                line = in.readLine();
             }
         } catch (Exception e){
-            System.out.println("Exception thrown");
+           log.log(Level.SEVERE, "Exception thrown whist parsing Request");
             System.exit(-1);
         }
         return null;
