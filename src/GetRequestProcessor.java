@@ -1,5 +1,7 @@
 import java.io.*;
 import java.net.URI;
+import java.nio.file.Files;
+import java.nio.file.Paths;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 //
@@ -23,11 +25,27 @@ public class GetRequestProcessor extends RequestProcessor {
     }
 
     /**
+     * Verify that the URI is only a file name and contains no sub-directories in its path
+     */
+    public boolean checkForSubDir(String uri){
+        String[] subDirs = uri.split(File.pathSeparator);
+        if(subDirs.length==1){
+            log.log(Level.INFO, "No sub-directories found.");
+            return true;
+        }
+        log.log(Level.INFO, "Sub-directories found.");
+        return false;
+    }
+
+    /**
      * Attempt to fulfill a GET request by searching for the specified file on the server
      */
     public HTTPStatus findFile(String uri){
         log.log(Level.INFO, "Attempting to find "+ uri +" amongst available server files.");
-        File dir = new File(".\\src\\ServerFiles");
+        //Check that the URI doesn't reference sub-directories
+        boolean subFolders = checkForSubDir(uri);
+        String ps = File.pathSeparator;
+        File dir = new File("."+ps+"src"+ps+"ServerFiles");
         File[] dir_contents = dir.listFiles();
         for(int i = 0; i<dir_contents.length; i++){
             if (dir_contents[i].getName().equalsIgnoreCase(uri)){
@@ -44,8 +62,14 @@ public class GetRequestProcessor extends RequestProcessor {
         //Assert that this is in fact a GET request
         try{
             assert(this.canProcess(request.getMethodType()));
+            String ps = File.pathSeparator;
             Response response = new Response(request.getHTTPVersion());
             HTTPStatus status = findFile(request.getURI());
+            response.setStatus(status);
+            if (status.getCode()=="302"){
+                byte[] data = Files.readAllBytes(Paths.get("."+ps+"src"+ps+"ServerFiles"+ps+request.getURI()));
+                response.setBody(data);
+            }
             return response;
         }
         catch(AssertionError assertionError){
