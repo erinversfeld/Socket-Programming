@@ -1,10 +1,17 @@
+
+import sun.misc.IOUtils;
+
 import java.io.ByteArrayInputStream;
 import java.io.DataOutputStream;
 import java.io.InputStream;
 import java.io.IOException;
 import java.io.OutputStream;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 //
 import java.util.List;
+import java.util.logging.Level;
+
 /**
  * 
  * Represents a Response type of HTTP message.</br>
@@ -20,7 +27,8 @@ public class Response extends Message {
     private HTTPStatus status;
     private String httpVersion;
     private InputStream bodyInput;
-    
+    private static final Logger log = Logger.getLogger("RequestLogging");
+
     /**
      * Create a Response message that adheres to the given version of the HTTP.
      */
@@ -81,9 +89,10 @@ public class Response extends Message {
     public static void send(final OutputStream output, final Response response) throws IOException   {
         try{
             output.write(response.getStartLine().getBytes());
+            byte[] body = IOUtils.toByteArray(response.bodyInput);
         }
         catch (IOException e){
-
+            log.log(Level.INFO, "Unable to write to the OutputStream for this socket.");
         }
     }
 
