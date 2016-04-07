@@ -1,5 +1,7 @@
 import java.io.*;
 import java.net.URI;
+import java.nio.file.Files;
+import java.nio.file.Paths;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 //
@@ -23,15 +25,40 @@ public class GetRequestProcessor extends RequestProcessor {
     }
 
     /**
-     * Attempt to fulfill a GET request by searching for the specified file on the server
+     * Verify that the URI is only a file name and contains no sub-directories in its path.
+     * A return value equal to false indicates that there are no sub-directories,
+     * while a return value of true indicates that there are sub-directories.
+     */
+    public boolean checkForSubDir(String uri){
+        log.log(Level.INFO, "Checking for sub-directories inside URI "+uri);
+        if(uri.lastIndexOf("\\")>0){
+            log.log(Level.INFO, "Last index of \\ found was "+uri.lastIndexOf("\\"));
+            return true;
+        }
+        log.log(Level.INFO, "Last index of \\ found was "+uri.lastIndexOf("\\"));
+        return false;
+    }
+
+    /**
+     * Attempt to fulfill a GET request by searching for the specified file on the server.
+     * Accessible server files are placed in a specific location, to prevent the rest of the system being readily
+     * accesible to unwanted queries. This preserves a degree of security with minimal effort.
      */
     public HTTPStatus findFile(String uri){
         log.log(Level.INFO, "Attempting to find "+ uri +" amongst available server files.");
+        //Check that the URI doesn't reference sub-directories
         File dir = new File(".\\src\\ServerFiles");
         File[] dir_contents = dir.listFiles();
-        for(int i = 0; i<dir_contents.length; i++){
-            if (dir_contents[i].getName().equalsIgnoreCase(uri)){
-                return HTTPStatus.FOUND;
+        boolean subDir = checkForSubDir(uri);
+        //If there are no sub-directories indicated in the URI, we can search through the expected location
+        if(!subDir){
+            log.log(Level.INFO, "No sub-directories found within the path name. Checking if file is on the server.");
+            for(int i = 0; i<dir_contents.length; i++){
+                log.log(Level.INFO, "Directory contents: "+dir_contents[i].getName());
+                String filename = uri.substring(1,uri.length());
+                if (dir_contents[i].getName().equalsIgnoreCase(filename)){
+                    return HTTPStatus.FOUND;
+                }
             }
         }
         return HTTPStatus.NOT_FOUND;
@@ -46,6 +73,12 @@ public class GetRequestProcessor extends RequestProcessor {
             assert(this.canProcess(request.getMethodType()));
             Response response = new Response(request.getHTTPVersion());
             HTTPStatus status = findFile(request.getURI());
+            response.setStatus(status);
+            if (status.getCode()=="302"){
+                log.log(Level.INFO, "Setting the body of the Response");
+                byte[] data = Files.readAllBytes(Paths.get(".\\src\\ServerFiles\\"+request.getURI()));
+                response.setBody(data);
+            }
             return response;
         }
         catch(AssertionError assertionError){
