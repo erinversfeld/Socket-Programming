@@ -31,6 +31,6 @@ public class WebServer {
         Socket socket = sSocket.accept();
         GetRequestProcessor rp = new GetRequestProcessor();
         Response response = rp.process(Request.parse(socket.getInputStream()));
-        response.send(new FileOutputStream(argv[1]), response);
+        response.send(socket.getOutputStream(), response);
      }
 }

@@ -79,7 +79,12 @@ public class Response extends Message {
      * (The <code>Message</code> class defines the constant <code>CRLF</code> for this purpose.)
      */
     public static void send(final OutputStream output, final Response response) throws IOException   {
-        // Code here.
+        try{
+            output.write(response.getStartLine().getBytes());
+        }
+        catch (IOException e){
+
+        }
     }
 
 }
