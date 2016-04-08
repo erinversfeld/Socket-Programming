@@ -77,6 +77,35 @@ public class Response extends Message {
     public void setBody(InputStream bodyInput) {
         this.bodyInput = bodyInput;
     }
+
+    /**
+     * Gets a byte[] representation of the contents of the bodyInput InputStream
+     * Used when sending a Response
+     */
+    private byte[] getBodyInput(){
+        log.log(Level.INFO, "Attempting to get the bodyInput in the form of a byte[]");
+        try{
+            int len = bodyInput.available();
+            byte[] out = new byte[len];
+            try{
+                bodyInput.read(out, 0, len);
+            }
+            catch (IOException e){
+                log.log(Level.SEVERE, "First byte of bodyInput cannot be read. Read documentation.");
+            }
+            catch (NullPointerException e){
+                log.log(Level.SEVERE, "out is null");
+            }
+            catch (IndexOutOfBoundsException e){
+                log.log(Level.SEVERE, "off is "+0+" len is "+len+" b.length is "+out.length);
+            }
+            return out;
+        }
+        catch (IOException e){
+            log.log(Level.SEVERE, "IOException thrown in getBodyInput()");
+        }
+        return null;
+    }
         
     /**
      * Send the given Response via the given output stream.</br>
@@ -87,9 +116,12 @@ public class Response extends Message {
      * (The <code>Message</code> class defines the constant <code>CRLF</code> for this purpose.)
      */
     public static void send(final OutputStream output, final Response response) throws IOException   {
+        log.log(Level.INFO, "Attempting to send an HTTP Response to the HTTP GET Request");
         try{
             output.write(response.getStartLine().getBytes());
-            byte[] body = IOUtils.toByteArray(response.bodyInput);
+            output.write(response.getBodyInput());
+            output.flush();
+            output.close();
         }
         catch (IOException e){
             log.log(Level.INFO, "Unable to write to the OutputStream for this socket.");
