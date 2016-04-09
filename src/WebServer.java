@@ -28,9 +28,12 @@ public class WebServer {
 		int port = argv.length>0 ?(new Integer(argv[0])).intValue():0;
         // Listen to the port for an incoming request
         ServerSocket sSocket = new ServerSocket(port);
+        if(!(argv.length>0)){
+            System.out.println("No port was specified when executing WebServer. Socket has defaulted to listening on "+port+".\nPlease use this port number when making requests.");
+        }
         Socket socket = sSocket.accept();
         GetRequestProcessor rp = new GetRequestProcessor();
         Response response = rp.process(Request.parse(socket.getInputStream()));
-        response.send(new FileOutputStream(argv[1]), response);
+        response.send(socket.getOutputStream(), response);
      }
 }

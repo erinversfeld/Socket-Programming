@@ -32,10 +32,8 @@ public class GetRequestProcessor extends RequestProcessor {
     public boolean checkForSubDir(String uri){
         log.log(Level.INFO, "Checking for sub-directories inside URI "+uri);
         if(uri.lastIndexOf("\\")>0){
-            log.log(Level.INFO, "Last index of \\ found was "+uri.lastIndexOf("\\"));
             return true;
         }
-        log.log(Level.INFO, "Last index of \\ found was "+uri.lastIndexOf("\\"));
         return false;
     }
 
@@ -69,6 +67,7 @@ public class GetRequestProcessor extends RequestProcessor {
      */
     public Response process(final Request request) throws Exception {
         //Assert that this is in fact a GET request
+        log.log(Level.INFO, "Attempting to process the HTTP GET Request");
         try{
             assert(this.canProcess(request.getMethodType()));
             Response response = new Response(request.getHTTPVersion());
