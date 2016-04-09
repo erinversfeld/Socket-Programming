@@ -1,11 +1,7 @@
 
 import sun.misc.IOUtils;
 
-import java.io.ByteArrayInputStream;
-import java.io.DataOutputStream;
-import java.io.InputStream;
-import java.io.IOException;
-import java.io.OutputStream;
+import java.io.*;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 //
@@ -92,12 +88,15 @@ public class Response extends Message {
             }
             catch (IOException e){
                 log.log(Level.SEVERE, "First byte of bodyInput cannot be read. Read documentation.");
+                return null;
             }
             catch (NullPointerException e){
                 log.log(Level.SEVERE, "out is null");
+                return null;
             }
             catch (IndexOutOfBoundsException e){
                 log.log(Level.SEVERE, "off is "+0+" len is "+len+" b.length is "+out.length);
+                return null;
             }
             return out;
         }
@@ -106,25 +105,28 @@ public class Response extends Message {
         }
         return null;
     }
-        
+
     /**
      * Send the given Response via the given output stream.</br>
-     * The method writes the start line, followed by the header 
-     * fields (one per line), followed by a blank line and then 
+     * The method writes the start line, followed by the header
+     * fields (one per line), followed by a blank line and then
      * the message body.</br>
-     * NOTE That lines are terminated with a carriage return and line feed. 
+     * NOTE That lines are terminated with a carriage return and line feed.
      * (The <code>Message</code> class defines the constant <code>CRLF</code> for this purpose.)
      */
     public static void send(final OutputStream output, final Response response) throws IOException   {
         log.log(Level.INFO, "Attempting to send an HTTP Response to the HTTP GET Request");
         try{
             output.write(response.getStartLine().getBytes());
-            output.write(response.getBodyInput());
-            output.flush();
+            output.write("\r\n\r\n".getBytes());
+            int line;
+            while((line = response.bodyInput.read())!=-1){
+                output.write(line);
+            }
             output.close();
         }
         catch (IOException e){
-            log.log(Level.INFO, "Unable to write to the OutputStream for this socket.");
+            log.log(Level.SEVERE, "Unable to write to the OutputStream for this socket.");
         }
     }
 
