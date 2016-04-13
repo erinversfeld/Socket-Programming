@@ -73,17 +73,15 @@ public class Request extends Message {
      * Read an HTTP request from the given input stream and return it as a Request object.
      */
     public static Request parse(final InputStream input) throws IOException {
-       try{
+        log.log(Level.INFO, "Attempting to parse input from InputStream into an HTTP Request");
+        try{
             BufferedReader in = new BufferedReader(new InputStreamReader(input));
             String line = in.readLine();
             while(in.readLine()!=null){
                 if(line.startsWith("GET")){
-                    log.log(Level.INFO, "GET request received");
                     String[] params = line.split(" ");
                     String uri = params[1];
-                    log.log(Level.INFO, ("GET URI is " +uri));
                     String v = params[2];
-                    log.log(Level.INFO, ("GET version is " +v));
                     return(new Request(HTTPMethodType.GET, uri, v));
                 }
                 else{
@@ -97,5 +95,4 @@ public class Request extends Message {
         }
         return null;
     }
-
 }

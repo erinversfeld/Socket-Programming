@@ -74,7 +74,6 @@ public class GetRequestProcessor extends RequestProcessor {
             HTTPStatus status = findFile(request.getURI());
             response.setStatus(status);
             if (status.getCode()=="302"){
-                log.log(Level.INFO, "Setting the body of the Response");
                 byte[] data = Files.readAllBytes(Paths.get(".\\src\\ServerFiles\\"+request.getURI()));
                 response.setBody(data);
             }

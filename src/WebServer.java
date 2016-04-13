@@ -26,14 +26,17 @@ public class WebServer {
     public static void main(String argv[]) throws Exception {
 		// Get the port number from the command line.
 		int port = argv.length>0 ?(new Integer(argv[0])).intValue():0;
-        // Listen to the port for an incoming request
         ServerSocket sSocket = new ServerSocket(port);
         if(!(argv.length>0)){
             System.out.println("No port was specified when executing WebServer. Socket has defaulted to listening on "+port+".\nPlease use this port number when making requests.");
         }
+        // Listen to the port for an incoming request
         Socket socket = sSocket.accept();
         GetRequestProcessor rp = new GetRequestProcessor();
+        //Generate an HTTP Request from the bytes passed in from the socket's InputStream
+        //Generate an HTTP Response to this request by processing it using the GetRequestProcessor
         Response response = rp.process(Request.parse(socket.getInputStream()));
+        //send the HTTP Response
         response.send(socket.getOutputStream(), response);
      }
 }

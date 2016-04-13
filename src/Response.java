@@ -85,6 +85,7 @@ public class Response extends Message {
     public static void send(final OutputStream output, final Response response) throws IOException   {
         log.log(Level.INFO, "Attempting to send an HTTP Response to the HTTP GET Request");
         try{
+            //Write the HTTP Response to the OutputStream with the correct formatting
             output.write(response.getStartLine().getBytes());
             output.write("\r\n\r\n".getBytes());
             int line;
