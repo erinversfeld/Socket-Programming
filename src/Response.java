@@ -75,38 +75,6 @@ public class Response extends Message {
     }
 
     /**
-     * Gets a byte[] representation of the contents of the bodyInput InputStream
-     * Used when sending a Response
-     */
-    private byte[] getBodyInput(){
-        log.log(Level.INFO, "Attempting to get the bodyInput in the form of a byte[]");
-        try{
-            int len = bodyInput.available();
-            byte[] out = new byte[len];
-            try{
-                bodyInput.read(out, 0, len);
-            }
-            catch (IOException e){
-                log.log(Level.SEVERE, "First byte of bodyInput cannot be read. Read documentation.");
-                return null;
-            }
-            catch (NullPointerException e){
-                log.log(Level.SEVERE, "out is null");
-                return null;
-            }
-            catch (IndexOutOfBoundsException e){
-                log.log(Level.SEVERE, "off is "+0+" len is "+len+" b.length is "+out.length);
-                return null;
-            }
-            return out;
-        }
-        catch (IOException e){
-            log.log(Level.SEVERE, "IOException thrown in getBodyInput()");
-        }
-        return null;
-    }
-
-    /**
      * Send the given Response via the given output stream.</br>
      * The method writes the start line, followed by the header
      * fields (one per line), followed by a blank line and then

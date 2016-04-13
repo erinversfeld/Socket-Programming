@@ -78,6 +78,14 @@ public class GetRequestProcessor extends RequestProcessor {
                 byte[] data = Files.readAllBytes(Paths.get(".\\src\\ServerFiles\\"+request.getURI()));
                 response.setBody(data);
             }
+            else if(status.getCode()=="404"){
+                byte[] data = "FILE NOT FOUND".getBytes();
+                response.setBody(data);
+            }
+            else{
+                byte[] data = "RESPONSE CORRUPTED. PLEASE TRY AGAIN OR LOG AN ISSUE AT www.github.com/erinversfeld/Socket-Programming".getBytes();
+                response.setBody(data);
+            }
             return response;
         }
         catch(AssertionError assertionError){
